@@ -1,0 +1,140 @@
+/* 整体布局 */
+:root {
+    line-height: 1.5;
+    font-weight: 400;
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    place-items: center;
+    min-width: 100%; /* 让页面宽度填充整个视窗 */
+    min-height: 100vh; /* 让页面高度填充整个视窗 */
+    background-color: #242424;
+    overflow: hidden; /* 防止页面出现滚动条 */
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+}
+
+.crypto-dashboard {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: black;
+    color: white;
+    overflow: hidden; /* 防止溢出 */
+}
+
+/* 主容器 */
+.main-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden; /* 防止出现滚动条 */
+}
+
+/* 侧边栏 */
+.sidebar {
+    width: 7%;
+    background-color: #333333;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    overflow: hidden;
+}
+
+/* 侧边栏标题 */
+.sidebar-title {
+    font-size: 1.2rem;
+    font-style: italic;
+    margin-bottom: 1.5rem;
+}
+
+.sidebar-nav {
+    width: 100%;
+}
+
+.sidebar-nav div {
+    height: 40px;
+    border-bottom: 1px solid #444;
+    display: flex;
+    align-items: center;
+}
+
+/* 主内容区 */
+.main-content {
+    width: 93%;
+    background-color: #000000;
+    padding: 1.5rem;
+    overflow: hidden; /* 防止内容区溢出 */
+}
+
+/* 标题 */
+.main-title {
+    height: 70px;
+    background-color: #333333;
+    text-align: center;
+    font-style: italic;
+}
+
+/* 网格布局 */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+/* 网格箱子 */
+.grid-box {
+    background-color: #333333;
+    border-radius: 8px;
+}
+
+/* 设置不同的区块大小 */
+.box1,
+.box2,
+.box3 {
+    height: 400px;
+}
+
+.box4 {
+    grid-column: span 2;
+    height: 150px;
+}
+
+.box5 {
+    height: 150px;
+}
+
+.box6 {
+    grid-column: span 3;
+    height: 290px;
+}
+
+/* 文字样式 */
+.text1 {
+    font-size: 64px;
+    font-family: "Jim Nightshade", cursive;
+    font-weight: 400;
+    margin-top: -16px;
+}
+
+.text2 {
+    font-size: 32px;
+    font-family: "Jim Nightshade", cursive;
+    font-weight: 400;
+}
