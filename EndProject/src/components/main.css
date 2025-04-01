@@ -11,7 +11,7 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-body {
+body, html {
     margin: 0;
     padding: 0;
     display: flex;
@@ -27,7 +27,7 @@ body {
     height: 100%;
 }
 
-.crypto-dashboard {
+.crypto-dashboard, .home-page{
     width: 100%;
     height: 100vh;
     display: flex;
@@ -49,12 +49,15 @@ body {
 /* 侧边栏 */
 .sidebar {
     width: 7%;
+     /* 确保 Sidebar 高度占满 */
     background-color: #333333;
     padding: 1rem;
     display: flex;
     flex-direction: column;
     align-items: start;
-    overflow: hidden;
+    overflow-y: auto; /* 允许 Sidebar 滚动 */
+    border-right: 1px solid #ddd;
+    margin-top: 70px; /* 留出 Header 的高度 */
 }
 
 /* 侧边栏标题 */
@@ -69,60 +72,148 @@ body {
 }
 
 .sidebar-nav div {
-    height: 40px;
-    border-bottom: 1px solid #444;
+    height: auto; /* 自动调整高度 */
+    border-bottom: 1px solid #fff; /* 更加白色的间隔线 */
     display: flex;
     align-items: center;
+    margin-bottom: 10px; /* 增加选项之间的间隔 */
+}
+
+.sidebar-item{
+    font-size: 30px;
+    font-family: "Jim Nightshade", cursive;
+    font-weight: 400;
+    padding: 10px 0; /* 增加上下间隔 */
+    cursor: pointer; /* 鼠标悬停时显示手型 */
+    transition: all 0.2s ease-in-out; /* 添加平滑过渡效果 */
+    text-align: left;
+}
+
+.sidebar-item:hover {
+    background-color: #444; /* 鼠标悬停时背景变暗 */
+    color: #fff; /* 悬停时文字颜色变白 */
+    transform: translateY(-2px); /* 悬停时轻微上移 */
+}
+
+.sidebar-item:active {
+    background-color: #555; /* 点击时背景颜色变深 */
+    transform: translateY(2px); /* 点击时轻微下移，模拟凹陷效果 */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5); /* 内部阴影，增强凹陷效果 */
+}
+
+/* 自定义滚动条样式 */
+.sidebar::-webkit-scrollbar {
+    width: 6px; /* 滚动条宽度 */
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: #888; /* 滚动条颜色 */
+    border-radius: 10px; /* 滚动条圆角 */
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* 鼠标悬停时滚动条颜色 */
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background-color: #333; /* 滚动条轨道颜色 */
 }
 
 /* 主内容区 */
 .main-content {
     width: 93%;
     background-color: #000000;
-    padding: 1.5rem;
-    overflow: hidden; /* 防止内容区溢出 */
+    padding: 1rem;
+    display: flex;
+    flex: 1; /* 占据剩余空间 */
+    margin-top: 70px; /* 留出 Header 的高度 */
+    box-sizing: border-box; /* 确保 padding 不影响布局 */
 }
 
 /* 标题 */
 .main-title {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 70px;
+    z-index: 1000;
     background-color: #333333;
     text-align: center;
     font-style: italic;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.home{
+    position: absolute;
+    left: 3.5%;
+    display: flex;
+    align-items: center;
 }
 
 /* 网格布局 */
 .grid-container {
+    height: 100%;
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    gap: 1rem; /* 增加 box 之间的间距 */
+    box-sizing: border-box; /* 确保内边距不会影响布局 */
+    flex-grow: 1;
 }
 
 /* 网格箱子 */
 .grid-box {
     background-color: #333333;
     border-radius: 8px;
+    padding: 1rem; /* 增加内边距 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 添加阴影 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 /* 设置不同的区块大小 */
 .box1,
 .box2,
 .box3 {
-    height: 400px;
+    height: 35vh;
 }
 
 .box4 {
     grid-column: span 2;
-    height: 150px;
+    height: 20vh;
 }
 
 .box5 {
-    height: 150px;
+    height: 20vh;
 }
 
 .box6 {
     grid-column: span 3;
-    height: 290px;
+    height: 21vh;
+}
+
+.grid-box h3 {
+    font-size: 1.5rem; /* 调整标题字体大小 */
+    color: #ffffff; /* 标题颜色 */
+    margin-bottom: 1rem; /* 增加标题和内容的间距 */
+}
+
+.grid-box p {
+    font-size: 1rem; /* 调整内容字体大小 */
+    color: #cccccc; /* 内容文字颜色 */
+    margin: 0.5rem 0; /* 增加段落间距 */
+}
+
+.grid-box canvas {
+    max-width: 100%;
+    height: auto;
 }
 
 /* 文字样式 */
@@ -130,7 +221,7 @@ body {
     font-size: 64px;
     font-family: "Jim Nightshade", cursive;
     font-weight: 400;
-    margin-top: -16px;
+    margin-top: -14px;
 }
 
 .text2 {
@@ -138,3 +229,13 @@ body {
     font-family: "Jim Nightshade", cursive;
     font-weight: 400;
 }
+
+.chart-container {
+    height: 400px;
+    padding: 1rem;
+    background-color: #333333;
+    border: 1px solid #636161;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
