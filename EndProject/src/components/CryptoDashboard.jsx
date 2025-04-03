@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, memo } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Chart, registerables } from "chart.js";
-import { CandlestickController, CandlestickElement } from "chartjs-chart-financial";
-import { Doughnut } from "react-chartjs-2"; // 引入 Doughnut 图表
 import "chartjs-adapter-date-fns";
-Chart.register(...registerables, CandlestickController, CandlestickElement);
+Chart.register(...registerables);
 import "./main.css";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import TradingViewWidget from "./TradingViewWidget"; // 导入 TradingViewWidget 组件
 
 const CryptoDashboard = () => {
+  const { coinId } = useParams();
   const cryptocurrencies = [
     { id: "bitcoin", name: "Bitcoin", description: "Bitcoin is a decentralized digital currency." },
     { id: "ethereum", name: "Ethereum", description: "Ethereum is a decentralized platform for building dApps." },
@@ -21,7 +22,6 @@ const CryptoDashboard = () => {
     { id: "solana", name: "Solana", description: "Solana is a high-performance blockchain supporting fast transactions." },
     { id: "binancecoin", name: "Binance Coin", description: "Binance Coin is the cryptocurrency of the Binance platform." },
     { id: "tron", name: "TRON", description: "TRON is a blockchain-based decentralized platform for digital content." },
-    { id: "shiba-inu", name: "Shiba Inu", description: "Shiba Inu is a meme cryptocurrency inspired by Dogecoin." },
     { id: "avalanche", name: "Avalanche", description: "Avalanche is a platform for decentralized applications and custom blockchains." },
     { id: "uniswap", name: "Uniswap", description: "Uniswap is a decentralized trading protocol for cryptocurrencies." },
     { id: "chainlink", name: "Chainlink", description: "Chainlink is a decentralized oracle network for smart contracts." },
@@ -33,127 +33,138 @@ const CryptoDashboard = () => {
   ];
 
   const [selectedCoin, setSelectedCoin] = useState(cryptocurrencies[0]);
-  const [prices, setPrices] = useState([]);
   const [coinData, setCoinData] = useState({});
-  const [loading, setLoading] = useState(true);
   const [exchangeRates, setExchangeRates] = useState(null);
-  const [ohlcData, setOhlcData] = useState([]);
-  const canvasRef = useRef(null);
-  const chartRef = useRef(null);
+  const [loading, setLoading] = useState(true);
 
-  // 缓存对象
-  const cache = {
-    prices: {},
-    coinData: {},
-    exchangeRates: {},
-    ohlcData: {},
+  const idToSymbolMap = {
+    bitcoin: "BTC",
+    ethereum: "ETH",
+    ripple: "XRP",
+    litecoin: "LTC",
+    cardano: "ADA",
+    polkadot: "DOT",
+    dogecoin: "DOGE",
+    solana: "SOL",
+    binancecoin: "BNB",
+    tron: "TRX",
+    avalanche: "AVAX",
+    uniswap: "UNI",
+    chainlink: "LINK",
+    stellar: "XLM",
+    monero: "XMR",
+    tezos: "XTZ",
+    cosmos: "ATOM",
+    vechain: "VET",
   };
+  
+  useEffect(() => {
+    const coin = cryptocurrencies.find((c) => c.id === coinId);
+    if (coin) {
+      setSelectedCoin(coin);
+    }
+  }, [coinId]); // 监听 coinId 的变化
 
   useEffect(() => {
-    const fetchPrices = async () => {
-      if (cache.prices[selectedCoin.id]) {
-        setPrices(cache.prices[selectedCoin.id]);
-        return;
-      }
-
+    const fetchCoinData = async () => {
       try {
         const response = await axios.get(
-          `/api/api/v3/coins/${selectedCoin.id}/market_chart`,
-          { params: { vs_currency: "usd", days: 7 } }
+          `https://data-api.coindesk.com/asset/v1/top/list`,
+          {
+            params: {
+              page: 1,
+              page_size: 10,
+              sort_by: "CIRCULATING_MKT_CAP_USD",
+              sort_direction: "DESC",
+              groups: "ID,BASIC,SUPPLY,PRICE",
+              toplist_quote_asset: "USD",
+            },
+          }
         );
-        cache.prices[selectedCoin.id] = response.data.prices; // 缓存数据
-        setPrices(response.data.prices);
-      } catch (error) {
-        console.error("Error fetching price data from CoinGecko", error);
-      }
-    };
 
-    const fetchCoinData = async () => {
-      if (cache.coinData[selectedCoin.id]) {
-        setCoinData(cache.coinData[selectedCoin.id]);
-        return;
-      }
+        const data = response.data?.Data?.LIST;
+        if (!data || !Array.isArray(data)) {
+          console.error("Invalid API response format: LIST is missing or not an array", response.data);
+          return;
+        }
 
-      try {
-        const response = await axios.get(`/api/api/v3/coins/${selectedCoin.id}`);
-        cache.coinData[selectedCoin.id] = response.data.market_data; // 缓存数据
-        setCoinData(response.data.market_data);
+        const symbol = idToSymbolMap[selectedCoin.id];
+        const coinData = data.find((coin) => coin.SYMBOL === symbol);
+
+        if (!coinData) {
+          console.error(`Selected coin (${selectedCoin.id}) not found in API response`);
+          return;
+        }
+
+        setCoinData(coinData);
       } catch (error) {
-        console.error("Error fetching coin data from CoinGecko", error);
+        console.error("Error fetching coin data from CoinDesk", error);
       }
     };
 
     const fetchExchangeRates = async () => {
-      if (cache.exchangeRates[selectedCoin.id]) {
-        setExchangeRates(cache.exchangeRates[selectedCoin.id]);
-        return;
-      }
-
       try {
-        const response = await axios.get(`/api/api/v3/simple/price`, {
-          params: { ids: selectedCoin.id, vs_currencies: "usd,eur,gbp" },
-        });
-        cache.exchangeRates[selectedCoin.id] = response.data[selectedCoin.id]; // 缓存数据
-        setExchangeRates(response.data[selectedCoin.id]);
+        const response = await axios.get(
+          `https://data-api.coindesk.com/asset/v1/top/list`,
+          {
+            params: {
+              page: 1,
+              page_size: 10,
+              sort_by: "CIRCULATING_MKT_CAP_USD",
+              sort_direction: "DESC",
+              groups: "ID,PRICE",
+              toplist_quote_asset: "USD",
+            },
+          }
+        );
+
+        const data = response.data?.Data?.LIST;
+        if (!data || !Array.isArray(data)) {
+          console.error("Invalid API response format: LIST is missing or not an array", response.data);
+          return;
+        }
+
+        const symbol = idToSymbolMap[selectedCoin.id];
+        const coinData = data.find((coin) => coin.SYMBOL === symbol);
+
+        if (!coinData) {
+          console.error(`Selected coin (${selectedCoin.id}) not found in API response`);
+          return;
+        }
+
+        const rates = {
+          usd: coinData.PRICE_USD,
+          eur: coinData.PRICE_EUR,
+          gbp: coinData.PRICE_GBP,
+        };
+
+        setExchangeRates(rates);
       } catch (error) {
-        console.error("Error fetching exchange rates", error);
+        console.error("Error fetching exchange rates from CoinDesk", error);
       }
     };
 
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        await fetchCoinData();
+        await fetchExchangeRates();
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setLoading(true);
-    fetchPrices();
-    fetchCoinData();
-    fetchExchangeRates();
-    setLoading(false);
+    fetchData();
+
+    const interval = setInterval(() => {
+      fetchCoinData();
+      fetchExchangeRates();
+    }, 30000); // 每 30 秒调用一次
+
+    return () => clearInterval(interval); // 清除定时器
   }, [selectedCoin]);
-
-  useEffect(() => {
-    if (chartRef.current) {
-      chartRef.current.destroy(); // 销毁已有的 Chart 实例
-    }
-
-    if (canvasRef.current) {
-      const formattedPrices = prices.map(([timestamp, price]) => ({
-        x: new Date(timestamp),
-        y: price,
-      }));
-
-      chartRef.current = new Chart(canvasRef.current, {
-        type: "line",
-        data: {
-          datasets: [
-            {
-              label: `${selectedCoin.name} Price (USD)`,
-              data: formattedPrices,
-              borderColor: "rgb(75, 192, 192)",
-              backgroundColor: "rgba(75, 192, 192, 0.2)",
-              tension: 0.2, // 平滑曲线
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              type: "time",
-              time: {
-                unit: "day",
-              },
-            },
-            y: {
-              beginAtZero: false,
-            },
-          },
-          plugins: {
-            legend: {
-              display: true, // 显示图例
-            },
-          },
-        },
-      });
-    }
-  }, [prices]);
 
   return (
     <div className="crypto-dashboard">
@@ -164,8 +175,7 @@ const CryptoDashboard = () => {
         <main className="main-content">
           <div className="grid-container">
             <div className="grid-box box1">
-              <h3>Price Chart (K-Line)</h3>
-              {loading ? <p>Loading...</p> : <canvas ref={canvasRef} />}
+              <TradingViewWidget symbol={idToSymbolMap[selectedCoin.id]} />
             </div>
             <div className="grid-box box2">
               <h3>All-Time High / Low</h3>
@@ -224,4 +234,4 @@ const CryptoDashboard = () => {
   );
 };
 
-export default CryptoDashboard;
+export default memo(CryptoDashboard);
