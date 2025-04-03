@@ -37,27 +37,7 @@ const CryptoDashboard = () => {
   const [exchangeRates, setExchangeRates] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const idToSymbolMap = {
-    bitcoin: "BTC",
-    ethereum: "ETH",
-    ripple: "XRP",
-    litecoin: "LTC",
-    cardano: "ADA",
-    polkadot: "DOT",
-    dogecoin: "DOGE",
-    solana: "SOL",
-    binancecoin: "BNB",
-    tron: "TRX",
-    avalanche: "AVAX",
-    uniswap: "UNI",
-    chainlink: "LINK",
-    stellar: "XLM",
-    monero: "XMR",
-    tezos: "XTZ",
-    cosmos: "ATOM",
-    vechain: "VET",
-  };
-  
+
   useEffect(() => {
     const coin = cryptocurrencies.find((c) => c.id === coinId);
     if (coin) {
@@ -69,98 +49,37 @@ const CryptoDashboard = () => {
     const fetchCoinData = async () => {
       try {
         const response = await axios.get(
-          `https://data-api.coindesk.com/asset/v1/top/list`,
-          {
-            params: {
-              page: 1,
-              page_size: 10,
-              sort_by: "CIRCULATING_MKT_CAP_USD",
-              sort_direction: "DESC",
-              groups: "ID,BASIC,SUPPLY,PRICE",
-              toplist_quote_asset: "USD",
-            },
-          }
+          `https://api.coingecko.com/api/v3/coins/${selectedCoin.id}`
         );
 
-        const data = response.data?.Data?.LIST;
-        if (!data || !Array.isArray(data)) {
-          console.error("Invalid API response format: LIST is missing or not an array", response.data);
-          return;
-        }
+        const data = response.data;
 
-        const symbol = idToSymbolMap[selectedCoin.id];
-        const coinData = data.find((coin) => coin.SYMBOL === symbol);
-
-        if (!coinData) {
-          console.error(`Selected coin (${selectedCoin.id}) not found in API response`);
-          return;
-        }
-
-        setCoinData(coinData);
-      } catch (error) {
-        console.error("Error fetching coin data from CoinDesk", error);
-      }
-    };
-
-    const fetchExchangeRates = async () => {
-      try {
-        const response = await axios.get(
-          `https://data-api.coindesk.com/asset/v1/top/list`,
-          {
-            params: {
-              page: 1,
-              page_size: 10,
-              sort_by: "CIRCULATING_MKT_CAP_USD",
-              sort_direction: "DESC",
-              groups: "ID,PRICE",
-              toplist_quote_asset: "USD",
-            },
-          }
-        );
-
-        const data = response.data?.Data?.LIST;
-        if (!data || !Array.isArray(data)) {
-          console.error("Invalid API response format: LIST is missing or not an array", response.data);
-          return;
-        }
-
-        const symbol = idToSymbolMap[selectedCoin.id];
-        const coinData = data.find((coin) => coin.SYMBOL === symbol);
-
-        if (!coinData) {
-          console.error(`Selected coin (${selectedCoin.id}) not found in API response`);
-          return;
-        }
-
-        const rates = {
-          usd: coinData.PRICE_USD,
-          eur: coinData.PRICE_EUR,
-          gbp: coinData.PRICE_GBP,
+        // 提取需要的数据
+        const formattedData = {
+          price: data.market_data.current_price.usd,
+          marketCap: data.market_data.market_cap.usd,
+          totalVolume: data.market_data.total_volume.usd,
+          totalSupply: data.market_data.total_supply,
+          circulatingSupply: data.market_data.circulating_supply,
+          exchangeRates: {
+            usd: data.market_data.current_price.usd,
+            eur: data.market_data.current_price.eur,
+            gbp: data.market_data.current_price.gbp,
+          },
         };
 
-        setExchangeRates(rates);
+        setCoinData(formattedData);
       } catch (error) {
-        console.error("Error fetching exchange rates from CoinDesk", error);
-      }
-    };
-
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        await fetchCoinData();
-        await fetchExchangeRates();
-      } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching coin data from CoinGecko", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchCoinData();
 
     const interval = setInterval(() => {
       fetchCoinData();
-      fetchExchangeRates();
     }, 30000); // 每 30 秒调用一次
 
     return () => clearInterval(interval); // 清除定时器
@@ -175,14 +94,13 @@ const CryptoDashboard = () => {
         <main className="main-content">
           <div className="grid-container">
             <div className="grid-box box1">
-              <TradingViewWidget symbol={idToSymbolMap[selectedCoin.id]} />
+              {selectedCoin && <TradingViewWidget symbol={selectedCoin.id.toUpperCase()} />}
             </div>
             <div className="grid-box box2">
-              <h3>All-Time High / Low</h3>
-              {coinData.ath && coinData.atl ? (
+              <h3>Price Now</h3>
+              {coinData.price ? (
                 <div>
-                  <p>ATH: ${coinData.ath.usd.toLocaleString()}</p>
-                  <p>ATL: ${coinData.atl.usd.toLocaleString()}</p>
+                  <p>${coinData.price.toLocaleString()}</p>
                 </div>
               ) : (
                 <p>Loading...</p>
@@ -190,27 +108,27 @@ const CryptoDashboard = () => {
             </div>
             <div className="grid-box box3">
               <h3>Market Cap</h3>
-              {coinData.market_cap ? (
-                <p>${coinData.market_cap.usd.toLocaleString()}</p>
+              {coinData.marketCap ? (
+                <p>${coinData.marketCap.toLocaleString()}</p>
               ) : (
                 <p>Loading...</p>
               )}
             </div>
             <div className="grid-box box4">
               <h3>24h Trading Volume</h3>
-              {coinData.total_volume ? (
-                <p>${coinData.total_volume.usd.toLocaleString()}</p>
+              {coinData.totalVolume ? (
+                <p>${coinData.totalVolume.toLocaleString()}</p>
               ) : (
                 <p>Loading...</p>
               )}
             </div>
             <div className="grid-box box5">
               <h3>Exchange Rates</h3>
-              {exchangeRates ? (
+              {coinData.exchangeRates ? (
                 <div>
-                  <p>USD: ${exchangeRates.usd}</p>
-                  <p>EUR: €{exchangeRates.eur}</p>
-                  <p>GBP: £{exchangeRates.gbp}</p>
+                  <p>USD: ${coinData.exchangeRates.usd.toLocaleString()}</p>
+                  <p>EUR: €{coinData.exchangeRates.eur.toLocaleString()}</p>
+                  <p>GBP: £{coinData.exchangeRates.gbp.toLocaleString()}</p>
                 </div>
               ) : (
                 <p>Loading...</p>
@@ -218,10 +136,10 @@ const CryptoDashboard = () => {
             </div>
             <div className="grid-box box6">
               <h3>Supply Data</h3>
-              {coinData.total_supply && coinData.circulating_supply ? (
+              {coinData.totalSupply && coinData.circulatingSupply ? (
                 <div>
-                  <p>Total Supply: {coinData.total_supply.toLocaleString()}</p>
-                  <p>Circulating Supply: {coinData.circulating_supply.toLocaleString()}</p>
+                  <p>Total Supply: {coinData.totalSupply.toLocaleString()}</p>
+                  <p>Circulating Supply: {coinData.circulatingSupply.toLocaleString()}</p>
                 </div>
               ) : (
                 <p>Loading...</p>

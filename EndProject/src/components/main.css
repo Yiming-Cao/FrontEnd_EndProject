@@ -46,6 +46,7 @@ body, html {
     overflow: hidden; /* 防止出现滚动条 */
 }
 
+
 /* 侧边栏 */
 .sidebar {
     width: 7%;
@@ -130,6 +131,25 @@ body, html {
     box-sizing: border-box; /* 确保 padding 不影响布局 */
 }
 
+.main-content-2 {
+    width: 93%;
+    background-color: #000000;
+    padding: 1rem;
+    display: flex;
+    flex: 1; /* 占据剩余空间 */
+    margin-top: 70px; /* 留出 Header 的高度 */
+    box-sizing: border-box; /* 确保 padding 不影响布局 */
+    overflow-y: auto;
+}
+
+.tradingview-widget{
+    width: 100%;
+    height: 100%;
+    background-color: #333333;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
 /* 标题 */
 .main-title {
     position: fixed;
@@ -165,6 +185,16 @@ body, html {
     flex-grow: 1;
 }
 
+.grid-container-2 {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem; /* 增加 box 之间的间距 */
+    box-sizing: border-box; /* 确保内边距不会影响布局 */
+    flex-grow: 1;
+}
+
 /* 网格箱子 */
 .grid-box {
     background-color: #333333;
@@ -190,25 +220,28 @@ body, html {
 .box4 {
     grid-column: span 2;
     height: 20vh;
+    padding: 1.5rem; /* 增加内边距 */
 }
 
 .box5 {
     height: 20vh;
+    padding: 1.5rem; /* 增加内边距 */
 }
 
 .box6 {
     grid-column: span 3;
     height: 21vh;
+    padding: 1.5rem; /* 增加内边距 */
 }
 
 .grid-box h3 {
-    font-size: 1.5rem; /* 调整标题字体大小 */
+    font-size: 2.5rem; /* 调整标题字体大小 */
     color: #ffffff; /* 标题颜色 */
     margin-bottom: 1rem; /* 增加标题和内容的间距 */
 }
 
 .grid-box p {
-    font-size: 1rem; /* 调整内容字体大小 */
+    font-size: 1.5rem; /* 调整内容字体大小 */
     color: #cccccc; /* 内容文字颜色 */
     margin: 0.5rem 0; /* 增加段落间距 */
 }
@@ -240,4 +273,33 @@ body, html {
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     text-align: center;
+    margin-right: 1rem;
   }
+
+.left-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.search-container {
+    width: 96%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+    margin-right: 1rem;
+}
+
+.calculator-container{
+    width: 86%;
+    height: 400px;
+    padding: 1rem;
+    background-color: #333333;
+    border: 1px solid #636161;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-top: 1rem;
+    margin-right: 1rem;
+}
