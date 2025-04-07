@@ -39,6 +39,35 @@ const Home = () => {
   const [amount, setAmount] = useState(1);
   const [selectedCurrency, setSelectedCurrency] = useState("bitcoin");
   const [conversionRate, setConversionRate] = useState(null);
+  const [favorites, setFavorites] = useState([]); // 存储被收藏的虚拟币
+
+  const toggleFavorite = (coin) => {
+    setFavorites((prevFavorites) => {
+      if (prevFavorites.some((fav) => fav.id === coin.id)) {
+        // 如果已经收藏，则取消收藏
+        return prevFavorites.filter((fav) => fav.id !== coin.id);
+      } else {
+        // 如果未收藏，则添加到收藏列表
+        return [coin, ...prevFavorites];
+      }
+    });
+  };
+
+  useEffect(() => {
+    const storedFavorites = localStorage.getItem("favorites");
+    if (storedFavorites) {
+      setFavorites(JSON.parse(storedFavorites)); // 将 JSON 字符串解析为对象
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favorites)); // 将对象转换为 JSON 字符串
+  }, [favorites]);
+
+  const sortedCoins = [
+    ...favorites,
+    ...marketShares.filter((coin) => !favorites.some((fav) => fav.id === coin.id)),
+  ];
 
   
   const handleCoinClick = (coin) => {
@@ -201,6 +230,16 @@ const Home = () => {
                     className="grid-box box1"
                     onClick={() => handleCoinClick(coin)}
                   >
+                    <div
+                      className="favorite-icon"
+                      onClick={(e) => {
+                        e.stopPropagation(); // 防止触发父级的点击事件
+                        toggleFavorite(coin);
+                      }}
+                      style={{ color: favorites.some((fav) => fav.id === coin.id) ? "yellow" : "#ccc" }}
+                    >
+                      ☆
+                    </div>
                     <img
                       src={coin.logo}
                       alt={`${coin.name} logo`}
@@ -224,12 +263,22 @@ const Home = () => {
               ) : searchTerm.trim() && filteredCoins.length === 0 ? (
                 <p>No matching cryptocurrencies found.</p>
               ) : (
-                marketShares.map((coin) => (
+                sortedCoins.map((coin) => (
                   <div
                     key={coin.id}
                     className="grid-box box1"
                     onClick={() => handleCoinClick(coin)}
                   >
+                    <div
+                      className="favorite-icon"
+                      onClick={(e) => {
+                        e.stopPropagation(); // 防止触发父级的点击事件
+                        toggleFavorite(coin);
+                      }}
+                      style={{ color: favorites.some((fav) => fav.id === coin.id) ? "yellow" : "#ccc" }}
+                    >
+                      ☆
+                    </div>
                     <img
                       src={coin.logo}
                       alt={`${coin.name} logo`}

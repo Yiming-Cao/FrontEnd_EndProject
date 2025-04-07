@@ -93,7 +93,7 @@ const CryptoDashboard = () => {
 
         <main className="main-content">
           <div className="grid-container">
-            <div className="grid-box box1">
+            <div className="grid-box box2">
               {selectedCoin && <TradingViewWidget symbol={selectedCoin.id.toUpperCase()} />}
             </div>
             <div className="grid-box box2">

@@ -208,6 +208,15 @@ body, html {
     text-align: center;
 }
 
+.box1 {
+    position: relative; /* 添加相对定位 */
+    padding: 10px;
+    background-color: #444; /* 修改背景颜色 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 修改阴影 */
+    text-align: center;
+  }
+
 /* 设置不同的区块大小 */
 .box1,
 .box2,
@@ -303,3 +312,12 @@ body, html {
     margin-top: 1rem;
     margin-right: 1rem;
 }
+
+.favorite-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+    color: #ccc; /* 默认灰色 */
+    cursor: pointer;
+  }
