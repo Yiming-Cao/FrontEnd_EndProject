@@ -167,7 +167,7 @@ const Home = () => {
     <div className="home-page">
       <Header />
       <div className="main-container">
-          <Sidebar cryptocurrencies={cryptocurrencies} setSelectedCoin={setSelectedCoin} />
+          <Sidebar cryptocurrencies={cryptocurrencies} favorites={favorites} setSelectedCoin={setSelectedCoin} />
           <main className="main-content-2">
             <div className="left-container">
               {/* 搜索框 */}

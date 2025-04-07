@@ -36,7 +36,31 @@ const CryptoDashboard = () => {
   const [coinData, setCoinData] = useState({});
   const [exchangeRates, setExchangeRates] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState([]); // 存储被收藏的虚拟币
+  
+    // 切换收藏状态
+  const toggleFavorite = (coin) => {
+    setFavorites((prevFavorites) => {
+      if (prevFavorites.some((fav) => fav.id === coin.id)) {
+        return prevFavorites.filter((fav) => fav.id !== coin.id); // 取消收藏
+      } else {
+        return [coin, ...prevFavorites]; // 添加到收藏
+      }
+    });
+  };
 
+  // 从 localStorage 加载收藏状态
+  useEffect(() => {
+    const storedFavorites = localStorage.getItem("favorites");
+    if (storedFavorites) {
+      setFavorites(JSON.parse(storedFavorites));
+    }
+  }, []);
+
+  // 将收藏状态保存到 localStorage
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }, [favorites]);
 
   useEffect(() => {
     const coin = cryptocurrencies.find((c) => c.id === coinId);
@@ -89,7 +113,7 @@ const CryptoDashboard = () => {
     <div className="crypto-dashboard">
       <Header />
       <div className="main-container">
-        <Sidebar cryptocurrencies={cryptocurrencies} setSelectedCoin={setSelectedCoin} />
+        <Sidebar cryptocurrencies={cryptocurrencies} favorites={favorites} setSelectedCoin={setSelectedCoin} />
 
         <main className="main-content">
           <div className="grid-container">
